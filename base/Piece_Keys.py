@@ -1,0 +1,13 @@
+class PieceKeys:
+    Pawn_White:     list[int] = []
+    Pawn_Black:     list[int] = []
+    Knight_White:   list[int] = []
+    Knight_Black:   list[int] = []
+    Bishop_White:   list[int] = []
+    Bishop_Black:   list[int] = []
+    Rook_White:     list[int] = []
+    Rook_Black:     list[int] = []
+    Queen_White:    list[int] = []
+    Queen_Black:    list[int] = []
+    King_Black:     list[int] = []
+    King_White:     list[int] = []
