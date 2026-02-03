@@ -1,6 +1,6 @@
 import tensorflow as tf
 import re
-from base.ChessRegex import Validator as vld
+from base.ChessSanLexer import Validator as vld
 from base.Piece_Keys import PieceKeys as pk
 
 
@@ -9,11 +9,6 @@ class TrainingData:
     def __init__(self, san_chess_notation: list[str]) -> None:
         self.san_notation:  list[str] = san_chess_notation
         self.board:         list[list[list[int]]] = [[[0]*8]*8]*8
-
-
-    def move(self, element: str) -> None:
-
-    def castle(self, element: str) -> None:
 
     def san_pattern_match(self, element: str) -> None:
         result: re.Match[str] | None = vld.valid_san.match(element)
