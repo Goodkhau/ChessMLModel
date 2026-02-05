@@ -1,5 +1,5 @@
 import tensorflow as tf
-from base.ChessSanLexer import ChessSanLexer as lexer
+from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
 
 
 class TrainingData:
@@ -17,7 +17,7 @@ class TrainingData:
         else:
             pos = pos[L-4:L-2] if '+' in pos else pos[L-3:L-1]
         
-        self.board[ ord(pos[0])-97 ][ int(pos[1]) ] += ( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
+        self.board[ ord(pos[0])-ord('a') ][ int(pos[1]) ] += ( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
 
     def san_to_tensorslices(self) -> list[tf.Tensor]:
         set: list[tf.Tensor] = []
