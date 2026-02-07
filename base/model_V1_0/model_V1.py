@@ -1,19 +1,27 @@
 import tensorflow as tf
 import sys
+from datasets import IterableDatasetDict, load_dataset
 from matplotlib import pyplot as plt
-
+from base.model_V1_0.DataFormatter import TrainingData
 
 MODEL_NAME = 'Little Blue'
-LOGDIR = '../log/{MODEL_NAME}'
+LOGDIR = f"../log/{MODEL_NAME}"
 BATCH_SIZE = 128
 NUM_EPOCS = 10
 NUM_CLASSES = 384
 
-
-dataset = tf.data.Dataset.from_tensor_slices([[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]]])
-for element in dataset:
-    print(element)
+dataset: IterableDatasetDict = load_dataset('angeluriot/chess_games', streaming=True)
+for game in dataset['train']:
+    format: TrainingData = TrainingData(game['moves_san'])
+    #data: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(format.san_to_tensorslices(), name=MODEL_NAME)
+    for tensor in format.san_to_tensorslices():
+        print(tensor)
+    break
 sys.exit()
+d = tf.data.Dataset.from_tensor_slices([[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]]])
+data_iterator = d.as_numpy_iterator()
+batch = data_iterator.next()
+print(batch[0])
 tf.Tensor
 
 input = tf.keras.Input(shape=(512,))

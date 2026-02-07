@@ -22,7 +22,5 @@ class Validator:
                                           ([1-8])?
                                           x?
                                         [a-h][1-8]\+?)
-
-                                      | (R[a-h]|[1-8]x?[a-h][1-8]\+?)
                                     )
                                     """, re.VERBOSE)
