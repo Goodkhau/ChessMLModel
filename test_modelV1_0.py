@@ -34,13 +34,27 @@ class TestSanPieceMatch(unittest.TestCase):
         self.assertEqual(pk.Bishop_Move, lexer(test_game[5]).chess_piece)
 
 class TestDataFormatter(unittest.TestCase):
-    def test_formatter(self) -> None:
+    def test_formatter_feature(self) -> None:
         format = formatter(test_game)
-        for index, element in enumerate(format.san_to_tensorslices()):
+        for index, element in enumerate(format.san_to_feature_tensorslices()):
             if (index <= 1):
-                print(str(index) + 'th Element')
+                print('Index ' + str(index) + ': Element')
                 print(element)
             self.assertEqual(element.shape, (8, 8, 8))
+    
+    def test_formatter_label(self) -> None:
+        format = formatter(test_game)
+        for index, element in enumerate(format.san_to_label_tensorslices()):
+            if (index <= 5):
+                print('Index ' + str(index) + ': Element')
+                print(element)
+            self.assertEqual(element.shape, (386))
+            self.assertTrue(sum(int(x) == 1 for x in element) == 1)
+        
+    def test_formatter_size(self) -> None:
+        format = formatter(test_game)
+        self.assertEqual(len(format.san_to_feature_tensorslices()), len(test_game)-1)
+        self.assertEqual(len(format.san_to_label_tensorslices()), len(test_game)-1)
 
     def test_board_update(self) -> None:
         for san in test_game:
@@ -84,5 +98,5 @@ class TestDataFormatter(unittest.TestCase):
         pos = 'c7'
         self.assertEqual([ord(pos[0])-ord('a'), int(pos[1])-1], [2, 6])
 
-# if __name__ == "__main__":
-#     _ = unittest.main()
+if __name__ == "__main__":
+    _ = unittest.main()

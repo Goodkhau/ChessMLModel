@@ -1,47 +1,26 @@
+from typing import LiteralString
+
+
 import tensorflow as tf
-import sys
-from datasets import IterableDatasetDict, load_dataset
-from matplotlib import pyplot as plt
-from base.model_V1_0.DataFormatter import TrainingData
+from tensorflow import Tensor
 
 MODEL_NAME = 'Little Blue'
-LOGDIR = f"../log/{MODEL_NAME}"
+LOGDIR: LiteralString = f"../log/{MODEL_NAME}"
 BATCH_SIZE = 128
 NUM_EPOCS = 10
-NUM_CLASSES = 384
+NUM_CLASSES = 386
 
-dataset: IterableDatasetDict = load_dataset('angeluriot/chess_games', streaming=True)
-for game in dataset['train']:
-    format: TrainingData = TrainingData(game['moves_san'])
-    #data: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(format.san_to_tensorslices(), name=MODEL_NAME)
-    for tensor in format.san_to_tensorslices():
-        print(tensor)
-    break
-sys.exit()
-d = tf.data.Dataset.from_tensor_slices([[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]],[[1,2],[3,4],[5,6],[7,8]]])
-data_iterator = d.as_numpy_iterator()
-batch = data_iterator.next()
-print(batch[0])
-tf.Tensor
-
-input = tf.keras.Input(shape=(512,))
-first_dense = tf.keras.layers.Dense(1024)(input)
-second_dense = tf.keras.layers.Dense(1024)(first_dense)
-third_dense = tf.keras.layers.Dense(768)(second_dense)
-fourth_dense = tf.keras.layers.Dense(512)(third_dense)
-outputs = tf.keras.layers.Dense(NUM_CLASSES)(fourth_dense)
-model = tf.keras.Model(inputs=input, outputs=outputs, name=MODEL_NAME)
-
-## model.summary()
-## sys.exit()
-
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=LOGDIR)
-
-history = model.fit(train_dataset, NUM_EPOCS, validation_data=val, callbacks=[tensorboard_callback])
-
-fig = plt.figure()
-plt.plot(history.history['loss'], color='teal', label='loss')
-plt.plot(history.history['val_loss'], color='orange', label='val_loss')
-fig.suptitle('Loss', fontsize=20)
-plt.legend(loc='upper left')
-plt.show()
+class model_V1:
+    def __init__(self) -> None:
+        self.model: tf.keras.Model[Tensor, Tensor] = self.define_model()
+    
+    def define_model(self) -> tf.keras.Model[Tensor, Tensor]:
+        input: Tensor = tf.keras.Input(shape=(8, 8, 8))
+        flat: Tensor = tf.keras.layers.Flatten(shape=(512,))(input)
+        first_dense: Tensor = tf.keras.layers.Dense(units=1024)(inputs=flat)
+        second_dense: Tensor = tf.keras.layers.Dense(units=1024)(inputs=first_dense)
+        third_dense: Tensor = tf.keras.layers.Dense(units=768)(inputs=second_dense)
+        fourth_dense: Tensor = tf.keras.layers.Dense(units=512)(inputs=third_dense)
+        outputs: Tensor = tf.keras.layers.Dense(units=NUM_CLASSES, activation='sigmoid')(inputs=fourth_dense)
+        model: tf.keras.Model[Tensor, Tensor] = tf.keras.Model(inputs=input, outputs=outputs, name=MODEL_NAME)
+        return model
