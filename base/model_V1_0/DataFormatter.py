@@ -9,7 +9,6 @@ from numpy._typing._nbit_base import _16Bit  # pyright: ignore[reportPrivateUsag
 class TrainingData:
     white_turn: bool = True
     def __init__(self, san_chess_notation: list[str]) -> None:
-        print(san_chess_notation)
         self.san_notation:  list[str] = san_chess_notation
         self.board: _Array[tuple[int, int, int], np.signedinteger[_16Bit]] = np.zeros((8, 8, 8), dtype=np.int16)
 
@@ -90,8 +89,6 @@ class TrainingData:
 
             else:
                 pos = 8*(ord(element[L-3])-ord('a')) + int(element[L-2]) if '+' in element else 8*(ord(element[L-2])-ord('a')) + int(element[L-1])
-
-            print(str(pos) + ' for ' + element)
 
             match (element[0]):
                 case 'O':

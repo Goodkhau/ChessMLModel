@@ -3,7 +3,7 @@ from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
 from base.model_V1_0.Piece_Keys import PieceKeys as pk
 from base.model_V1_0.DataFormatter import TrainingData as formatter
 
-test_game = [
+test_game: list[str] = [
     "e4","d6","d4","g6","Nc3",
     "Bg7","f4","a6","e5","b5",
     "Qf3","c6","Bd3","Nh6","h3",

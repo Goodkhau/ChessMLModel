@@ -16,6 +16,11 @@ class PieceKeys:
     King_Castle:    list[list[int]] = [[ 6,-1, 3,-6, 6, 2,-1,-6], [ 2,-5,-5, 5,-8,-5, 7, 2]]
 
     def get_chess_key_from_san(self, san_element: str) -> list[list[int]]:
+        if san_element == 'O-O-O':
+            return self.Queen_Castle
+        if san_element == 'O-O':
+            return self.King_Castle
+            
         match (san_element[0]):
             case 'N':
                 return self.Knight_Capture if 'x' in san_element else self.Knight_Move
@@ -24,12 +29,8 @@ class PieceKeys:
             case 'R':
                 return self.Rook_Capture if 'x' in san_element else self.Rook_Move
             case 'Q':
-                if san_element == 'O-O-O':
-                    return self.Queen_Castle
                 return self.Queen_Capture if 'x' in san_element else self.Queen_Move
             case 'K':
-                if san_element == 'O-O':
-                    return self.King_Castle
                 return self.King_Capture if 'x' in san_element else self.King_Move
             case _:
                 if any(char in san_element for char in ['N','B','R','Q','K']):
