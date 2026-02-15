@@ -3,14 +3,12 @@ import numpy as np
 from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
 from base.model_V1_0.Piece_Keys import PieceKeys as pk
 
-from numpy._core.multiarray import _Array  # pyright: ignore[reportPrivateUsage]
-from numpy._typing._nbit_base import _16Bit  # pyright: ignore[reportPrivateUsage]
 
 class TrainingData:
     white_turn: bool = True
     def __init__(self, san_chess_notation: list[str]) -> None:
         self.san_notation:  list[str] = san_chess_notation
-        self.board: _Array[tuple[int, int, int], np.signedinteger[_16Bit]] = np.zeros((8, 8, 8), dtype=np.int16)
+        self.board = np.zeros((8, 8, 8), dtype=np.int16)  # pyright: ignore[reportUnannotatedClassAttribute]
 
     def update_board(self, lex: lexer) -> None:
         pos: str = lex.san_element
