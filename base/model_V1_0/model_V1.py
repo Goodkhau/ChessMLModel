@@ -1,16 +1,14 @@
-from typing import LiteralString
-
-
 import tensorflow as tf
 from tensorflow import Tensor
+from base.Model_Interface import Functional_API_Interface
 
 MODEL_NAME = 'Little Blue'
-LOGDIR: LiteralString = f"../log/{MODEL_NAME}"
+LOGDIR: str = f"../log/{MODEL_NAME}"
 BATCH_SIZE = 128
 NUM_EPOCS = 10
 NUM_CLASSES = 386
 
-class model_V1:
+class model_V1(Functional_API_Interface):
     def __init__(self) -> None:
         self.model: tf.keras.Model[Tensor, Tensor] = self.define_model()
     
