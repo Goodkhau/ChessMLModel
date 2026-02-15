@@ -16,9 +16,8 @@ class Pipeline_Interface(ABC):
 
 
 class TFRecords(Pipeline_Interface):
-    def __init__(self) -> None:
-        self.name: str = datetime.now().strftime(format="%Y%m%d%H%M%S")
-
+    def __init__(self, name:str|None = None) -> None:
+        self.name: str = name if name else datetime.now().strftime(format="%Y%m%d%H%M%S")
 
     def train_model(self, model:tf.keras.Model[tf.Tensor, tf.Tensor]) -> None:
         return

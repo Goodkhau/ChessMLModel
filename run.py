@@ -1,4 +1,5 @@
 import tensorflow as tf
+import sys
 from data.DataPipeline import TFRecords, Pipeline_Interface
 from base.model_V1_0.model_V1 import model_V1
 from prompter import get_input
@@ -29,6 +30,10 @@ if __name__ == "__main__":
                 selection = get_input(lower=0, upper=3, prompt=f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n")
 
     print("Exiting.\n")
+
+else:
+    print("File exist only as an entry point.\nExiting.\n")
+    sys.exit()
     # for game in dataset['train']:
     #     format: TrainingData = TrainingData(game['moves_san'])
     #     #data: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(format.san_to_tensorslices(), name=MODEL_NAME)
