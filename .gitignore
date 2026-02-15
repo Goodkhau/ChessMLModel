@@ -5,3 +5,7 @@ __pycache__/
 
 # Environments
 env/
+/.python-version
+
+# Training data directory
+training_data/

@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Model Trainer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${fileDirname}../run.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
