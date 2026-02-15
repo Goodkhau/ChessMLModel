@@ -47,7 +47,7 @@ class TrainingData:
         
         self.board[ ord(pos[0])-ord('a') ][ int(pos[1])-1 ] += np.array( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
 
-    def san_to_feature_tensorslices(self) -> list[tf.Tensor]:
+    def san_to_token_tensorslices(self) -> list[tf.Tensor]:
         features: list[tf.Tensor] = []
 
         for index, element in enumerate(self.san_notation):

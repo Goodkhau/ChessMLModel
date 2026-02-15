@@ -36,7 +36,7 @@ class TestSanPieceMatch(unittest.TestCase):
 class TestDataFormatter(unittest.TestCase):
     def test_formatter_feature(self) -> None:
         format = formatter(test_game)
-        for index, element in enumerate(format.san_to_feature_tensorslices()):
+        for index, element in enumerate(format.san_to_token_tensorslices()):
             if (index <= 1):
                 print('Index ' + str(index) + ': Element')
                 print(element)
@@ -53,7 +53,7 @@ class TestDataFormatter(unittest.TestCase):
         
     def test_formatter_size(self) -> None:
         format = formatter(test_game)
-        self.assertEqual(len(format.san_to_feature_tensorslices()), len(test_game)-1)
+        self.assertEqual(len(format.san_to_token_tensorslices()), len(test_game)-1)
         self.assertEqual(len(format.san_to_label_tensorslices()), len(test_game)-1)
 
     def test_board_update(self) -> None:

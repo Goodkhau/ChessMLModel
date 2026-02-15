@@ -1,13 +1,14 @@
 import tensorflow as tf
+from data.DataPipeline import populate_training_data
 from base.model_V1_0.model_V1 import model_V1
 
-
-PROMPT: str = f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n"
 
 def valid_selection(selection: int) -> bool:
     return False if selection < 0 or selection > 3 else True
 
 def get_selection(selection: int = -1) -> int:
+    PROMPT: str = f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n"
+
     while (not valid_selection(selection)):
         try:
             selection = int(input(PROMPT))
@@ -25,7 +26,7 @@ if __name__ == "__main__":
         model: None | tf.keras.Model[tf.Tensor, tf.Tensor] = None
         match (selection):
             case 1:
-                format_training_data()
+                populate_training_data('my_model')
             case 2:
                 model = model_V1().model
                 model.summary()
@@ -36,8 +37,6 @@ if __name__ == "__main__":
             case _:
                 selection = get_selection()
     print("Exiting.\n")
-
-    dataset: ds.IterableDatasetDict = ds.load_dataset('angeluriot/chess_games', streaming=True)
     # for game in dataset['train']:
     #     format: TrainingData = TrainingData(game['moves_san'])
     #     #data: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(format.san_to_tensorslices(), name=MODEL_NAME)
@@ -48,13 +47,13 @@ if __name__ == "__main__":
     ## model.summary()
     ## sys.exit()
 
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=LOGDIR)
+# tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=LOGDIR)
 
-history = model.fit(train_dataset, NUM_EPOCS, validation_data=val, callbacks=[tensorboard_callback])
+# history = model.fit(train_dataset, NUM_EPOCS, validation_data=val, callbacks=[tensorboard_callback])
 
-fig = plt.figure()
-plt.plot(history.history['loss'], color='teal', label='loss')
-plt.plot(history.history['val_loss'], color='orange', label='val_loss')
-fig.suptitle('Loss', fontsize=20)
-plt.legend(loc='upper left')
-plt.show()
+# fig = plt.figure()
+# plt.plot(history.history['loss'], color='teal', label='loss')
+# plt.plot(history.history['val_loss'], color='orange', label='val_loss')
+# fig.suptitle('Loss', fontsize=20)
+# plt.legend(loc='upper left')
+# plt.show()
