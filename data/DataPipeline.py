@@ -1,8 +1,10 @@
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false
+
 import datasets as ds
 import tensorflow as tf
 from base.model_V1_0.DataFormatter import TrainingData as formatter
 
-# pyright: reportUnknownArgumentType=false
 
 tfrecord_size: int
 
@@ -66,7 +68,7 @@ def populate_training_data(name: str) -> None:
         with tf.io.TFRecordWriter(path=tfrecord_path) as writer:
             for tensor in data:
                 serialized_example = serialize_features_with_labels(tensor[0], tensor[1])
-                writer.write(serialized_example.numpy())
+                writer.write(record=serialized_example.numpy())
         
         if index >= limit_games:
             break
