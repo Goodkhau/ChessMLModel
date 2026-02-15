@@ -4,37 +4,8 @@
 import datasets as ds
 import tensorflow as tf
 from base.model_V1_0.DataFormatter import TrainingData as formatter
+from prompter import get_input
 
-
-tfrecord_size: int
-
-def valid_size(size:int) -> bool:
-    return True if size >= 100000 and size <= 1000000 else False
-
-def get_tfrecord_size() -> int:
-    PROMPT = "Enter the size of the TF records by the number of games.";
-    tfrecord_size: int = 0;
-    while (not valid_size(size=tfrecord_size)):
-        try:
-            tfrecord_size = int(input(PROMPT))
-        except:
-            print("Invalid input")
-    
-    return tfrecord_size
-
-def valid_limit(size:int) -> bool:
-    return True if size >= 0 and size <= 1000*tfrecord_size else False
-
-def get_limit() -> int:
-    PROMPT = "Enter the number of games you want to process.";
-    limit: int = 0;
-    while (not valid_limit(size=limit)):
-        try:
-            limit = int(input(PROMPT))
-        except:
-            print("Invalid input")
-    
-    return limit
 
 def serialize_features_with_labels(token: tf.Tensor, label: tf.Tensor):
     data: dict[str, tf.train.Feature] = {
@@ -48,8 +19,8 @@ def populate_training_data(name: str) -> None:
     hugging_face_link: str = 'angeluriot/chess_games'
 
     data: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensors(tensors=0)
-    tfrecord_size = get_tfrecord_size()
-    limit_games: int = get_limit()
+    tfrecord_size: int = get_input(lower=100000, upper=1000000, prompt="Enter the size of the TF records by the number of games.")
+    limit_games: int = get_input(lower=1, upper=1000*tfrecord_size, prompt="Enter the number of games you want to process.")
 
     counter: int = 0
     current_record: int = 0

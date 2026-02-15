@@ -1,23 +1,7 @@
 import tensorflow as tf
 from data.DataPipeline import populate_training_data
 from base.model_V1_0.model_V1 import model_V1
-
-
-def valid_selection(selection: int) -> bool:
-    return False if selection < 0 or selection > 3 else True
-
-def get_selection(selection: int = -1) -> int:
-    PROMPT: str = f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n"
-
-    while (not valid_selection(selection)):
-        try:
-            selection = int(input(PROMPT))
-            if not valid_selection(selection):
-                raise ValueError()
-        except:
-            print("Invalid selection.\n")
-
-    return selection
+from prompter import get_input
 
 
 if __name__ == "__main__":
@@ -34,8 +18,10 @@ if __name__ == "__main__":
                 if not model:
                     print("Model not selected.\n")
                     continue
+                
+
             case _:
-                selection = get_selection()
+                selection = get_input(lower=0, upper=3, prompt=f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n")
     print("Exiting.\n")
     # for game in dataset['train']:
     #     format: TrainingData = TrainingData(game['moves_san'])
