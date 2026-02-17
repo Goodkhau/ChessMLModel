@@ -8,4 +8,4 @@ env/
 /.python-version
 
 # Training data directory
-training_data/
+data/training_data/*

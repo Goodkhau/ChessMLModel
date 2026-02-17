@@ -41,8 +41,6 @@ class TrainingData:
         else:
             pos = pos[L-3:L-1] if '+' in pos else pos[L-2:L]
         
-        print(pos)
-        
         self.board[ ord(pos[0])-ord('a') ][ int(pos[1])-1 ] += np.array( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
 
     def san_to_token_tensorslices(self) -> list[tf.Tensor]:
@@ -76,7 +74,6 @@ class TrainingData:
             L: int = len(element)
 
             if element == 'O-O' or element == 'O-O-O':
-                print('Castle')
                 pos = 0
 
             elif element[0] in ['N','B','R','Q','K']:
