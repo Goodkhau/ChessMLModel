@@ -48,21 +48,27 @@ class TFRecords(Pipeline_Interface):
 
         dataset: ds.IterableDatasetDict = ds.load_dataset(hugging_face_link, streaming=True)
         for index, game in enumerate[dict[str, list[str]]](dataset['train']):
+            format = formatter(san_chess_notation=game['moves_san'])
             counter += 1
 
             if (counter <= tfrecord_size and index < limit_games):
-                format = formatter(san_chess_notation=game['moves_san'])
                 token: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices((format.san_to_token_tensorslices()))
                 label: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices((format.san_to_label_tensorslices()))
                 complete_token = complete_token.concatenate(dataset=token)
                 complete_label = complete_label.concatenate(dataset=label)
-
-            counter = 0 # reset counter
+                continue
+            
             tfrecord_path: str = f"{Path.cwd()}/data/training_data/{self.name}_{current_record:04}"
             with tf.io.TFRecordWriter(path=tfrecord_path) as writer:
                 complete_data = tf.data.Dataset.zip(complete_token, complete_label)
                 for token, label in complete_data:
                     writer.write(record=self.serialize_features_with_labels(token, label))  # pyright: ignore[reportUnknownArgumentType  # pyright: ignore[reportUnknownArgumentType, reportArgumentType]
             
+            complete_token = tf.data.Dataset.from_tensor_slices((format.san_to_token_tensorslices()))
+            complete_label = tf.data.Dataset.from_tensor_slices((format.san_to_label_tensorslices()))
+            counter = 1 # reset counter
+            current_record += 1
+
+            print(str(index) + ' of ' + str(limit_games))
             if index >= limit_games:
                 break

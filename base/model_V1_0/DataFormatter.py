@@ -1,3 +1,4 @@
+import sys
 import tensorflow as tf
 import numpy as np
 from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
@@ -9,12 +10,19 @@ class TrainingData:
     def __init__(self, san_chess_notation: list[str]) -> None:
         self.san_notation:  list[str] = san_chess_notation
         self.board = np.zeros((8, 8, 8), dtype=np.int16)  # pyright: ignore[reportUnannotatedClassAttribute]
+    
+    # Does not account for castling
+    def get_position_from_san(self, san:str) -> str:
+        L: int = len(san)-1 if '+' in san or '#' in san else len(san)
+        if san[0] in ['N','B','R','Q','K']:
+            return san[L-2:L]
+        elif any(char in san for char in ['N','B','R','Q','K']):
+            return san[L-4:L-2]
+        else:
+            return san[L-2:L]
 
     def update_board(self, lex: lexer) -> None:
-        pos: str = lex.san_element
-        L: int = len(pos)
-
-        if 'O-O' == pos:
+        if 'O-O' == lex.san_element:
             if self.white_turn:
                 self.board[6][0] += np.array(pk.King_Castle[0])
                 self.board[5][0] += np.array(pk.Rook_Move[0])
@@ -23,7 +31,7 @@ class TrainingData:
                 self.board[5][7] += np.array(pk.Rook_Move[0])
             return
 
-        elif 'O-O-O' == pos:
+        elif 'O-O-O' == lex.san_element:
             if self.white_turn:
                 self.board[2][0] += np.array(pk.King_Castle[1])
                 self.board[3][0] += np.array(pk.Rook_Move[1])
@@ -32,16 +40,17 @@ class TrainingData:
                 self.board[3][7] += np.array(pk.Rook_Move[1])
             return
 
-        elif pos[0] in ['N','B','R','Q','K']:
-            pos = pos[L-3:L-1] if '+' in pos else pos[L-2:L]
+        position: str = self.get_position_from_san(san=lex.san_element)
 
-        elif any(char in pos for char in ['N','B','R','Q','K']):
-            pos = pos[L-4:L-2] if '+' in pos else pos[L-3:L-1]
+        try:
+            self.board[ ord(position[0])-ord('a') ][ int(position[1])-1 ] += np.array( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
+        except ValueError:
+            print("DataFormatter.py: Value Error: " + lex.san_element)
+            sys.exit(1)
+        except IndexError:
+            print("DataFormatter.py: Index Error: " + position)
+            sys.exit(1)
 
-        else:
-            pos = pos[L-3:L-1] if '+' in pos else pos[L-2:L]
-        
-        self.board[ ord(pos[0])-ord('a') ][ int(pos[1])-1 ] += np.array( lex.chess_piece[0] if self.white_turn else lex.chess_piece[1] )
 
     def san_to_token_tensorslices(self) -> list[tf.Tensor]:
         features: list[tf.Tensor] = []
@@ -53,7 +62,7 @@ class TrainingData:
             lex: lexer = lexer(element)
 
             if not lex.san_is_valid:
-                print(element)
+                print("DataFormatter.py: invalid san: " + element)
                 return features
 
             self.update_board(lex)
@@ -65,25 +74,21 @@ class TrainingData:
     def san_to_label_tensorslices(self) -> list[tf.Tensor]:
         labels: list[tf.Tensor] = []
 
-        for index, element in enumerate(self.san_notation):
+        for index, element in enumerate[str](self.san_notation):
             if index == 0:
                 continue
 
             label = np.zeros((386), dtype=np.int8)
 
-            L: int = len(element)
-
             if element == 'O-O' or element == 'O-O-O':
                 pos = 0
-
-            elif element[0] in ['N','B','R','Q','K']:
-                pos = 8*(ord(element[L-3])-ord('a')) + int(element[L-2]) if '+' in element else 8*(ord(element[L-2])-ord('a')) + int(element[L-1]) 
-
-            elif any(char in element for char in ['N','B','R','Q','K']):
-                pos = 8*(ord(element[L-4])-ord('a')) + int(element[L-3]) if '+' in element else 8*(ord(element[L-3])-ord('a')) + int(element[L-2])
-
             else:
-                pos = 8*(ord(element[L-3])-ord('a')) + int(element[L-2]) if '+' in element else 8*(ord(element[L-2])-ord('a')) + int(element[L-1])
+                try:
+                    position: str = self.get_position_from_san(san=element)
+                    pos: int = 8*(ord(position[0])-ord('a')) + int(position[1])
+                except ValueError:
+                    print("DataFormatter.py: Value Error: " + element)
+                    sys.exit(1)
 
             match (element[0]):
                 case 'O':

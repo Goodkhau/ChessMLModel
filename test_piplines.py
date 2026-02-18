@@ -11,12 +11,13 @@ class test_populate_pipeline(unittest.TestCase):
         pipeline.populate_training_data(default_size=10, default_games=100)
 
         name = pipeline.name
-        directory: str = join(Path.cwd(), "/data/trainingdata")
-        self.assertTrue(expr=any([f for f in listdir(directory) if isfile(join(directory, name) and f == name)]))
+        directory: str = f"{Path.cwd()}/data/training_data/"
+        self.assertTrue(expr=any([file for file in listdir(path=directory) if (file[:-5] == name)]))
 
         for file in listdir(directory):
-            if file != name:
+            if file[:-5] != name:
                 continue
+            print("Removing: " + directory + file)
             os.remove(path=directory+file)
     
 if __name__ == '__main__':
