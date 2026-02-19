@@ -9,3 +9,4 @@ env/
 
 # Training data directory
 data/training_data/*
+!data/training_data/readme.md

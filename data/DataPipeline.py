@@ -3,6 +3,7 @@
 import datasets as ds
 import numpy as np
 import tensorflow as tf
+import os
 from pathlib import Path
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -47,6 +48,10 @@ class TFRecords(Pipeline_Interface):
         current_record: int = 0
 
         dataset: ds.IterableDatasetDict = ds.load_dataset(hugging_face_link, streaming=True)
+        directory = f"{Path.cwd()}/data/training_data/{self.name}/"
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+
         for index, game in enumerate[dict[str, list[str]]](dataset['train']):
             format = formatter(san_chess_notation=game['moves_san'])
             counter += 1
@@ -57,8 +62,8 @@ class TFRecords(Pipeline_Interface):
                 complete_token = complete_token.concatenate(dataset=token)
                 complete_label = complete_label.concatenate(dataset=label)
                 continue
-            
-            tfrecord_path: str = f"{Path.cwd()}/data/training_data/{self.name}_{current_record:04}"
+
+            tfrecord_path: str = f"{Path.cwd()}/data/training_data/{self.name}/{self.name}_{current_record:04}"
             with tf.io.TFRecordWriter(path=tfrecord_path) as writer:
                 complete_data = tf.data.Dataset.zip(complete_token, complete_label)
                 for token, label in complete_data:
