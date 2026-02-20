@@ -1,7 +1,5 @@
 import os
-import sys
 import unittest
-from os import listdir
 from pathlib import Path
 from data.DataPipeline import Pipeline_Interface, TFRecords
 
@@ -13,9 +11,9 @@ class test_populate_pipeline(unittest.TestCase):
 
         name = pipeline.name
         directory: str = f"{Path.cwd()}/data/training_data/{name}/"
-        self.assertTrue(expr=any([file for file in listdir(path=directory) if (file[:-5] == name)]))
+        self.assertTrue(expr=any([file for file in os.listdir(path=directory) if (file[:-5] == name)]))
 
-        for file in listdir(directory):
+        for file in os.listdir(directory):
             if file[:-5] != name:
                 continue
             print("Removing: " + directory + file)

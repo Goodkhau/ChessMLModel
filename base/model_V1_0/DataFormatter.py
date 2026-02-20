@@ -48,7 +48,7 @@ class TrainingData:
             print("DataFormatter.py: Value Error: " + lex.san_element)
             sys.exit(1)
         except IndexError:
-            print("DataFormatter.py: Index Error: " + position)
+            print(f"DataFormatter.py: Index Error: {position}\nSAN Element: {lex.san_element}")
             sys.exit(1)
 
 

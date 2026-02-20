@@ -10,9 +10,9 @@ NUM_CLASSES = 386
 
 class model_V1(Functional_API_Interface):
     def __init__(self) -> None:
-        self.model: tf.keras.Model[Tensor, Tensor] = self.define_model()
+        self.model= self.define_model()
     
-    def define_model(self) -> tf.keras.Model[Tensor, Tensor]:
+    def define_model(self):
         input: Tensor = tf.keras.Input(shape=(8, 8, 8))
         flat: Tensor = tf.keras.layers.Flatten(shape=(512,))(input)
         first_dense: Tensor = tf.keras.layers.Dense(units=1024)(inputs=flat)
@@ -21,4 +21,5 @@ class model_V1(Functional_API_Interface):
         fourth_dense: Tensor = tf.keras.layers.Dense(units=512)(inputs=third_dense)
         outputs: Tensor = tf.keras.layers.Dense(units=NUM_CLASSES, activation='sigmoid')(inputs=fourth_dense)
         model: tf.keras.Model[Tensor, Tensor] = tf.keras.Model(inputs=input, outputs=outputs, name=MODEL_NAME)
+        model.compile(optimizer='adam', loss=tf.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
         return model

@@ -4,7 +4,7 @@ def valid_size(size:int, lower:int, upper:int) -> bool:
     return True if size >= lower and size <= upper else False
 
 def get_input(prompt:str = "", lower:int = 0, upper:int = sys.maxsize) -> int:
-    response: int = 0;
+    response: int = -1;
     while (not valid_size(size=response, lower=lower, upper=upper)):
         try:
             response = int(input(prompt))

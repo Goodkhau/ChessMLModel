@@ -1,12 +1,15 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportUnknownVariableType=false
+
 import datasets as ds
 import numpy as np
 import tensorflow as tf
 import os
 from pathlib import Path
+from matplotlib import pyplot as plt
 from abc import ABC, abstractmethod
 from datetime import datetime
+
 from base.model_V1_0.DataFormatter import TrainingData as formatter
 from prompter import get_input
 
@@ -22,7 +25,36 @@ class TFRecords(Pipeline_Interface):
         self.name: str = name if name else datetime.now().strftime(format="%Y%m%d%H%M%S")
 
     def train_model(self, model) -> None:
-        return
+        directory = f"{Path.cwd()}/data/training_data/{self.name}/"
+        if not os.path.exists(directory):
+            print(f"DataPipeline.py Error: data for TFRecord pipeline '/training_data/{self.name}/' does not exist.")
+            return
+        
+        tfrecords: list[str] = []
+        for file in os.listdir(directory):
+            if file is 'data_spec.json':
+                continue
+
+            tfrecords.append(file)
+        
+        for tfrecord in tfrecords:
+            dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
+            data_size = int(len(dataset))
+
+            validation = dataset.skip(int(data_size*0.7)).take(int(data_size*0.2))
+            evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
+            dataset = dataset.take(int(data_size*0.7))
+
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/{model.name}/{self.name}/logs/")
+
+            history = model.fit(dataset, epochs=5, validation_data=validation, callbacks=[tensorboard_callback])
+
+            fig = plt.figure()
+            _ = plt.plot(history.history['loss'], color='teal', label='loss')
+            _ = plt.plot(history.history['val_loss'], color='orange', label='val_loss')
+            _ = fig.suptitle('Loss', fontsize=20)
+            _ = plt.legend(loc='upper left')
+            plt.show()
 
 
     def serialize_features_with_labels(self, token: tf.Tensor, label: tf.Tensor):
