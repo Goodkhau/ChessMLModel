@@ -21,8 +21,18 @@ class Pipeline_Interface(ABC):
 
 
 class TFRecords(Pipeline_Interface):
-    def __init__(self, name:str|None = None) -> None:
-        self.name: str = name if name else datetime.now().strftime(format="%Y%m%d%H%M%S")
+    def __init__(self, name:str = '') -> None:
+        self.name: str = name if name != '' else datetime.now().strftime(format="%Y%m%d%H%M%S")
+    
+    def parse_function(self, example):
+        feature_description = {
+            'token': tf.io.FixedLenFeature([], tf.string),
+            'label': tf.io.FixedLenFeature([], tf.string)
+        }
+        parsed_example = tf.io.parse_single_example(example, feature_description)
+        parsed_token =  tf.io.parse_tensor(parsed_example['token'], out_type=tf.int16)
+        parsed_label =  tf.io.parse_tensor(parsed_example['label'], out_type=tf.int8)
+        return (tf.reshape(parsed_token, [8,8,8]), tf.reshape(parsed_label, [386]))
 
     def train_model(self, model) -> None:
         directory = f"{Path.cwd()}/data/training_data/{self.name}/"
@@ -35,27 +45,30 @@ class TFRecords(Pipeline_Interface):
             if file is 'data_spec.json':
                 continue
 
-            tfrecords.append(file)
+            tfrecords.append(f"{Path.cwd()}/data/training_data/{self.name}/{file}")
         
         for tfrecord in tfrecords:
-            dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
-            data_size = int(len(dataset))
+            raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
+            dataset = raw_dataset.map(self.parse_function)
+            data_size = 0
+            for _ in dataset:
+                data_size+=1
+            
+            dataset = dataset.batch(batch_size=8000)
+            dataset = dataset.shuffle(1000, True)
 
             validation = dataset.skip(int(data_size*0.7)).take(int(data_size*0.2))
             evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
             dataset = dataset.take(int(data_size*0.7))
 
-            tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/{model.name}/{self.name}/logs/")
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/logs/{model.name}/{self.name}/")
 
-            history = model.fit(dataset, epochs=5, validation_data=validation, callbacks=[tensorboard_callback])
-
+            history = model.fit((dataset), epochs=20, validation_data=(validation), callbacks=[tensorboard_callback])
             fig = plt.figure()
-            _ = plt.plot(history.history['loss'], color='teal', label='loss')
-            _ = plt.plot(history.history['val_loss'], color='orange', label='val_loss')
-            _ = fig.suptitle('Loss', fontsize=20)
-            _ = plt.legend(loc='upper left')
-            plt.show()
-
+            plt.plot(history.history['loss'], color='teal', label='loss')
+            fig.suptitle('Loss', fontsize=20)
+            plt.legend(loc='upper left')
+            plt.savefig("plot.pdf", format='pdf', bbox_inches='tight')
 
     def serialize_features_with_labels(self, token: tf.Tensor, label: tf.Tensor):
         serialized_token = tf.io.serialize_tensor(token)
@@ -94,12 +107,13 @@ class TFRecords(Pipeline_Interface):
                 complete_token = complete_token.concatenate(dataset=token)
                 complete_label = complete_label.concatenate(dataset=label)
                 continue
-
+            
             tfrecord_path: str = f"{Path.cwd()}/data/training_data/{self.name}/{self.name}_{current_record:04}"
+            print("Writing to file: " + tfrecord_path)
             with tf.io.TFRecordWriter(path=tfrecord_path) as writer:
                 complete_data = tf.data.Dataset.zip(complete_token, complete_label)
                 for token, label in complete_data:
-                    writer.write(record=self.serialize_features_with_labels(token, label))  # pyright: ignore[reportUnknownArgumentType  # pyright: ignore[reportUnknownArgumentType, reportArgumentType]
+                    writer.write(record=self.serialize_features_with_labels(token, label))
             
             complete_token = tf.data.Dataset.from_tensor_slices((format.san_to_token_tensorslices()))
             complete_label = tf.data.Dataset.from_tensor_slices((format.san_to_label_tensorslices()))

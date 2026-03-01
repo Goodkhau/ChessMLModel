@@ -22,7 +22,7 @@ class TrainingData:
             return san[L-2:L]
 
     def update_board(self, lex: lexer) -> None:
-        if 'O-O' == lex.san_element:
+        if 'O-O' in lex.san_element:
             if self.white_turn:
                 self.board[6][0] += np.array(pk.King_Castle[0])
                 self.board[5][0] += np.array(pk.Rook_Move[0])
@@ -31,7 +31,7 @@ class TrainingData:
                 self.board[5][7] += np.array(pk.Rook_Move[0])
             return
 
-        elif 'O-O-O' == lex.san_element:
+        elif 'O-O-O' in lex.san_element:
             if self.white_turn:
                 self.board[2][0] += np.array(pk.King_Castle[1])
                 self.board[3][0] += np.array(pk.Rook_Move[1])
@@ -80,7 +80,7 @@ class TrainingData:
 
             label = np.zeros((386), dtype=np.int8)
 
-            if element == 'O-O' or element == 'O-O-O':
+            if 'O-O' in element or 'O-O-O' in element:
                 pos = 0
             else:
                 try:
