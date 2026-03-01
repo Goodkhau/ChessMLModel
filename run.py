@@ -8,24 +8,15 @@ from prompter import get_input
 if __name__ == "__main__":
     selection: int = -1
     while (selection):
-        pipeline: None | Pipeline_Interface = None
-        model = None
+        pipeline: Pipeline_Interface
         match (selection):
             case 1:
-                pipeline = TFRecords()
-                pipeline.populate_training_data(default_size=10000, default_games=10000)
+                pipeline = TFRecords(name='20260228155526')
+                #pipeline.populate_training_data(default_size=1000, default_games=10000)
             case 2:
                 model = model_V1().model
                 model.summary()
             case 3:
-                if model is None:
-                    print("Model not selected.\n")
-                    continue
-
-                if pipeline is None:
-                    print("Pipeline not selected.\n")  # pyright: ignore[reportUnreachable]
-                    continue
-
                 pipeline.train_model(model)
             case _:
                 print("Choose a valid selection")
