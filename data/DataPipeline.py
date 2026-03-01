@@ -63,7 +63,7 @@ class TFRecords(Pipeline_Interface):
             dataset = dataset.take(int(data_size*0.7))
             print(dataset)
 
-            tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/{model.name}/{self.name}/logs/")
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/logs/{model.name}/{self.name}/")
 
             history = model.fit((dataset), epochs=5, validation_data=(validation), callbacks=[tensorboard_callback])
 
