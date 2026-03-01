@@ -51,30 +51,24 @@ class TFRecords(Pipeline_Interface):
             raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
             dataset = raw_dataset.map(self.parse_function)
             data_size = 0
-            for element in dataset:
-                if (data_size < 10):
-                    print(element)
+            for _ in dataset:
                 data_size+=1
             
-            dataset = dataset.batch(batch_size=5000)
+            dataset = dataset.batch(batch_size=8000)
+            dataset = dataset.shuffle(1000, True)
 
             validation = dataset.skip(int(data_size*0.7)).take(int(data_size*0.2))
             evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
             dataset = dataset.take(int(data_size*0.7))
-            print(dataset)
 
             tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/logs/{model.name}/{self.name}/")
 
-            history = model.fit((dataset), epochs=5, validation_data=(validation), callbacks=[tensorboard_callback])
-
+            history = model.fit((dataset), epochs=20, validation_data=(validation), callbacks=[tensorboard_callback])
             fig = plt.figure()
             plt.plot(history.history['loss'], color='teal', label='loss')
-            plt.plot(history.history['val_loss'], color='orange', label='val_loss')
             fig.suptitle('Loss', fontsize=20)
             plt.legend(loc='upper left')
-            plt.show()
-            print('finished')
-
+            plt.savefig("plot.pdf", format='pdf', bbox_inches='tight')
 
     def serialize_features_with_labels(self, token: tf.Tensor, label: tf.Tensor):
         serialized_token = tf.io.serialize_tensor(token)
