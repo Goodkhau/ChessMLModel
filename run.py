@@ -1,6 +1,7 @@
 import sys
 from data.Pipeline_Interface import Pipeline_Interface
 from data.TFRecords import TFRecords
+from data.Cycle_TFRecords import Cycle_TFRecords
 from base.model_V1_0.model_V1 import model_V1
 from prompter import get_input
 
@@ -11,7 +12,7 @@ if __name__ == "__main__":
         pipeline: Pipeline_Interface
         match (selection):
             case 1:
-                pipeline = TFRecords(name='20260228155526')
+                pipeline = Cycle_TFRecords()
                 #pipeline.populate_training_data(default_size=1000, default_games=10000)
             case 2:
                 model = model_V1().model
