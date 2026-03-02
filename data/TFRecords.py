@@ -47,6 +47,7 @@ class TFRecords(Pipeline_Interface):
     @override
     def train_model(self, model) -> None:
         tfrecords: list[str] = self._get_tfrecords_in_dir()
+        pdfname_date: str = datetime.now().strftime(format="%Y%m%d%H%M%S")
 
         if len(tfrecords) == 0:
             return
@@ -60,13 +61,14 @@ class TFRecords(Pipeline_Interface):
         
         for index, tfrecord in enumerate[str](tfrecords):
             raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
-            dataset: tf.data.Dataset[tuple[tf.Tensor, tf.Tensor]] = raw_dataset.map(self.parse_function)
+            dataset: tf.data.Dataset[tuple[tf.Tensor, tf.Tensor]] = raw_dataset.map(self.parse_function, num_parallel_calls=tf.data.AUTOTUNE)
             data_size = 0
             for _ in dataset:
                 data_size+=1
             
-            dataset = dataset.batch(batch_size=512)
             dataset = dataset.shuffle(1000, True)
+            dataset = dataset.batch(batch_size=512)
+            dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
             validation = dataset.skip(int(data_size*0.8)).take(int(data_size*0.2))
             # evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
@@ -79,7 +81,7 @@ class TFRecords(Pipeline_Interface):
             plt.plot(history.history['loss'], color='teal', label='loss')
             fig.suptitle('Loss', fontsize=20)
             plt.legend(loc='upper left')
-            plt.savefig(f"{Path.cwd()}/data/plots/{model.name}/{self.name}/{index:04}.pdf", format='pdf', bbox_inches='tight')
+            plt.savefig(f"{Path.cwd()}/data/plots/{model.name}/{self.name}/{pdfname_date}_{index:04}.pdf", format='pdf', bbox_inches='tight')
 
     def serialize_features_with_labels(self, token: tf.Tensor, label: tf.Tensor):
         serialized_token = tf.io.serialize_tensor(token)

@@ -11,6 +11,8 @@ from base.model_V1_0.DataFormatter import TrainingData as formatter
 from data.Pipeline_Interface import Pipeline_Interface
 from data.TFRecords import TFRecords
 
+from huggingface_hub import login
+
 
 class Cycle_TFRecords(Pipeline_Interface):
     def __init__(self) -> None:
@@ -25,10 +27,12 @@ class Cycle_TFRecords(Pipeline_Interface):
             os.mkdir(directory)
         
         hugging_face_link: str = 'angeluriot/chess_games'
+        hugging_face_token: str = ''
+        login(token=hugging_face_token)
 
         complete_token: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (8,8,8), dtype=np.int16))
         complete_label: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (386,), dtype=np.int8))
-        tfrecord_size: int = 5000
+        tfrecord_size: int = 1000
         limit_games: int = 25000
 
         counter: int = 0
@@ -69,5 +73,8 @@ class Cycle_TFRecords(Pipeline_Interface):
                 current_record = 0
                 iteration+=1
 
-                if iteration == 1:
-                    model.save(f"{Path.cwd()}/base/model_V1_0/outputs/{model.name}_{iteration:04}.keras")
+                if iteration%5 == 0:
+                    model.save(f"{Path.cwd()}/base/model_V1_0/outputs/{model.name}_{iteration//5-1:04}.keras")
+        
+        iteration+=1
+        model.save(f"{Path.cwd()}/base/model_V1_0/outputs/{model.name}_{iteration//5:04}.keras")
