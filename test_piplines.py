@@ -1,7 +1,8 @@
 import os
 import unittest
 from pathlib import Path
-from data.DataPipeline import Pipeline_Interface, TFRecords
+from data.Pipeline_Interface import Pipeline_Interface
+from data.TFRecords import TFRecords
 
 class test_populate_pipeline(unittest.TestCase):
     ## Need to run in debug mode, python GIL is giving error not relevent to test

@@ -13,3 +13,6 @@ data/training_data/*
 
 base/logs/*
 !base/logs/readme.md
+
+data/plots/*
+!data/plots/readme.md

@@ -1,6 +1,6 @@
-import tensorflow as tf
 import sys
-from data.DataPipeline import TFRecords, Pipeline_Interface
+from data.Pipeline_Interface import Pipeline_Interface
+from data.TFRecords import TFRecords
 from base.model_V1_0.model_V1 import model_V1
 from prompter import get_input
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
                 model = model_V1().model
                 model.summary()
             case 3:
-                pipeline.train_model(model)
+                pipeline.train_model(model)  # pyright: ignore[reportUnreachable]
             case _:
                 print("Choose a valid selection")
         selection = get_input(lower=0, upper=3, prompt=f"Select an option\n1: Load and Partition Dataset.\n2: Select Model.\n3: Train and Output Model.\n")
