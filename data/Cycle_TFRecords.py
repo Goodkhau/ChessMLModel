@@ -33,6 +33,7 @@ class Cycle_TFRecords(Pipeline_Interface):
 
         counter: int = 0
         current_record: int = 0
+        iteration: int = 0
 
         dataset: ds.IterableDatasetDict = ds.load_dataset(hugging_face_link, streaming=True)
 
@@ -62,5 +63,11 @@ class Cycle_TFRecords(Pipeline_Interface):
             current_record += 1
 
             if index%limit_games == 0:
+                print("Starting training.")
+                pipeline.train_model(model)
                 pipeline.remove_population()
                 current_record = 0
+                iteration+=1
+
+                if iteration == 1:
+                    model.save(f"{Path.cwd()}/base/model_V1_0/outputs/{model.name}_{iteration:04}.keras")

@@ -16,11 +16,20 @@ class model_V1(Functional_API_Interface):
     def define_model(self):
         input: Tensor = tf.keras.Input(shape=(8, 8, 8), dtype=tf.int16)
         flat: Tensor = tf.keras.layers.Flatten()(input)
-        first_dense: Tensor = tf.keras.layers.Dense(units=1024)(inputs=flat)
-        second_dense: Tensor = tf.keras.layers.Dense(units=1024)(inputs=first_dense)
-        third_dense: Tensor = tf.keras.layers.Dense(units=768)(inputs=second_dense)
-        fourth_dense: Tensor = tf.keras.layers.Dense(units=512)(inputs=third_dense)
+        first_dense: Tensor = tf.keras.layers.Dense(
+            units=1024
+        )(inputs=flat)
+        second_dense: Tensor = tf.keras.layers.Dense(
+            units=1024
+        )(inputs=first_dense)
+        third_dense: Tensor = tf.keras.layers.Dense(
+            units=768
+        )(inputs=second_dense)
+        fourth_dense: Tensor = tf.keras.layers.Dense(
+            units=512
+        )(inputs=third_dense)
         outputs: Tensor = tf.keras.layers.Dense(units=NUM_CLASSES, activation='sigmoid')(inputs=fourth_dense)
         model: tf.keras.Model[Tensor, Tensor] = tf.keras.Model(inputs=input, outputs=outputs, name=MODEL_NAME)
-        model.compile(optimizer='adam', loss=tf.losses.CategoricalCrossentropy(), metrics=['accuracy'])
+        optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001)
+        model.compile(optimizer=optimizer, loss=tf.losses.CategoricalCrossentropy(), metrics=['accuracy'], )
         return model
