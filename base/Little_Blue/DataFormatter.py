@@ -1,8 +1,8 @@
 import sys
 import tensorflow as tf
 import numpy as np
-from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
-from base.model_V1_0.Piece_Keys import PieceKeys as pk
+from base.Little_Blue.ChessSanLexer import ChessSanLexer as lexer
+from base.Little_Blue.Piece_Keys import PieceKeys as pk
 
 
 class TrainingData:

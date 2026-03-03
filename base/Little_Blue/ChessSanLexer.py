@@ -1,6 +1,6 @@
 import re
-from base.model_V1_0.Piece_Keys import PieceKeys as pieces
-from base.model_V1_0.ChessSanRegex import Validator as vd
+from base.Little_Blue.Piece_Keys import PieceKeys as pieces
+from base.Little_Blue.ChessSanRegex import Validator as vd
 
 class ChessSanLexer:
     def __init__(self, san_element: str) -> None:

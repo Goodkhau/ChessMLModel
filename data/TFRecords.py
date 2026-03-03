@@ -1,44 +1,29 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportUnknownVariableType=false
 
+from typing import override
 import datasets as ds
 import numpy as np
 import tensorflow as tf
 import os
 from pathlib import Path
 from matplotlib import pyplot as plt
-from abc import ABC, abstractmethod
 from datetime import datetime
 
-from base.model_V1_0.DataFormatter import TrainingData as formatter
+from base.Little_Blue.DataFormatter import TrainingData as formatter
 from prompter import get_input
-
-
-class Pipeline_Interface(ABC):
-    @abstractmethod
-    def train_model(self, model) -> None:
-        pass
+from data.Pipeline_Interface import Pipeline_Interface
 
 
 class TFRecords(Pipeline_Interface):
     def __init__(self, name:str = '') -> None:
         self.name: str = name if name != '' else datetime.now().strftime(format="%Y%m%d%H%M%S")
-    
-    def parse_function(self, example):
-        feature_description = {
-            'token': tf.io.FixedLenFeature([], tf.string),
-            'label': tf.io.FixedLenFeature([], tf.string)
-        }
-        parsed_example = tf.io.parse_single_example(example, feature_description)
-        parsed_token =  tf.io.parse_tensor(parsed_example['token'], out_type=tf.int16)
-        parsed_label =  tf.io.parse_tensor(parsed_example['label'], out_type=tf.int8)
-        return (tf.reshape(parsed_token, [8,8,8]), tf.reshape(parsed_label, [386]))
 
-    def train_model(self, model) -> None:
-        directory = f"{Path.cwd()}/data/training_data/{self.name}/"
+    def _get_tfrecords_in_dir(self) -> list[str]:
+        directory: str = f"{Path.cwd()}/data/training_data/{self.name}/"
         if not os.path.exists(directory):
             print(f"DataPipeline.py Error: data for TFRecord pipeline '/training_data/{self.name}/' does not exist.")
-            return
+            return []
         
         tfrecords: list[str] = []
         for file in os.listdir(directory):
@@ -47,28 +32,56 @@ class TFRecords(Pipeline_Interface):
 
             tfrecords.append(f"{Path.cwd()}/data/training_data/{self.name}/{file}")
         
-        for tfrecord in tfrecords:
+        return tfrecords
+    
+    def parse_function(self, example) -> tuple[tf.Tensor, tf.Tensor]:
+        feature_description = {
+            'token': tf.io.FixedLenFeature([], tf.string),
+            'label': tf.io.FixedLenFeature([], tf.string)
+        }
+        parsed_example = tf.io.parse_single_example(example, feature_description)
+        parsed_token: tf.Tensor =  tf.io.parse_tensor(parsed_example['token'], out_type=tf.int16)
+        parsed_label: tf.Tensor =  tf.io.parse_tensor(parsed_example['label'], out_type=tf.int8)
+        return (tf.reshape(tensor=parsed_token, shape=[8,8,8]), tf.reshape(tensor=parsed_label, shape=[386]))
+
+    @override
+    def train_model(self, model) -> None:
+        tfrecords: list[str] = self._get_tfrecords_in_dir()
+        pdfname_date: str = datetime.now().strftime(format="%Y%m%d%H%M%S")
+
+        if len(tfrecords) == 0:
+            return
+        
+        directory: str = f"{Path.cwd()}/data/plots/{model.name}/"
+        if not os.path.exists(path=directory):
+            os.mkdir(path=directory)
+        directory = f"{Path.cwd()}/data/plots/{model.name}/{self.name}/"
+        if not os.path.exists(path=directory):
+            os.mkdir(path=directory)
+        
+        for index, tfrecord in enumerate[str](tfrecords):
             raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=tfrecord)
-            dataset = raw_dataset.map(self.parse_function)
+            dataset: tf.data.Dataset[tuple[tf.Tensor, tf.Tensor]] = raw_dataset.map(self.parse_function, num_parallel_calls=tf.data.AUTOTUNE)
             data_size = 0
             for _ in dataset:
                 data_size+=1
             
-            dataset = dataset.batch(batch_size=8000)
-            dataset = dataset.shuffle(1000, True)
+            dataset = dataset.shuffle(1024, True)
+            dataset = dataset.batch(batch_size=512)
+            dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
-            validation = dataset.skip(int(data_size*0.7)).take(int(data_size*0.2))
-            evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
-            dataset = dataset.take(int(data_size*0.7))
+            validation = dataset.skip(int(data_size*0.8)).take(int(data_size*0.2))
+            # evaulation = dataset.skip(int(data_size*0.9)).take(int(data_size*0.1))
+            dataset = dataset.take(int(data_size*0.8))
 
             tensorboard_callback = tf.keras.callbacks.TensorBoard(f"{Path.cwd()}/base/logs/{model.name}/{self.name}/")
 
-            history = model.fit((dataset), epochs=20, validation_data=(validation), callbacks=[tensorboard_callback])
+            history = model.fit((dataset), epochs=67, validation_data=(validation), callbacks=[tensorboard_callback])
             fig = plt.figure()
             plt.plot(history.history['loss'], color='teal', label='loss')
             fig.suptitle('Loss', fontsize=20)
             plt.legend(loc='upper left')
-            plt.savefig("plot.pdf", format='pdf', bbox_inches='tight')
+            plt.savefig(f"{Path.cwd()}/data/plots/{model.name}/{self.name}/{pdfname_date}_{index:04}.pdf", format='pdf', bbox_inches='tight')
 
     def serialize_features_with_labels(self, token: tf.Tensor, label: tf.Tensor):
         serialized_token = tf.io.serialize_tensor(token)
@@ -81,13 +94,13 @@ class TFRecords(Pipeline_Interface):
         return example.SerializeToString()
 
 
-    def populate_training_data(self, default_size:int, default_games:int) -> None:
+    def populate_training_data(self, default_size:int = -1, default_games:int = -1) -> None:
         hugging_face_link: str = 'angeluriot/chess_games'
 
         complete_token: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (8,8,8), dtype=np.int16))
         complete_label: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (386,), dtype=np.int8))
-        tfrecord_size: int = default_size if default_size else get_input(lower=100000, upper=1000000, prompt="Enter the size of the TF records by the number of games.")
-        limit_games: int = default_games if default_games else get_input(lower=1, upper=1000*tfrecord_size, prompt="Enter the number of games you want to process.")
+        tfrecord_size: int = default_size if default_size!=-1 else get_input(lower=100000, upper=1000000, prompt="Enter the size of the TF records by the number of games.")
+        limit_games: int = default_games if default_games!=-1 else get_input(lower=1, upper=1000*tfrecord_size, prompt="Enter the number of games you want to process.")
 
         counter: int = 0
         current_record: int = 0
@@ -123,3 +136,13 @@ class TFRecords(Pipeline_Interface):
             print(str(index) + ' of ' + str(limit_games))
             if index >= limit_games:
                 break
+
+    def remove_population(self) -> None:
+        tfrecords: list[str] = self._get_tfrecords_in_dir()
+
+        if len(tfrecords) == 0:
+            return
+
+        for tfrecord in tfrecords:
+            print('Removing: ' + tfrecord)
+            os.remove(path=tfrecord)

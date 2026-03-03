@@ -11,5 +11,5 @@ env/
 data/training_data/*
 !data/training_data/readme.md
 
-base/logs/*
-!base/logs/readme.md
+base/Little_Blue/outputs/*
+!base/Little_Blue/outputs/readme.md
