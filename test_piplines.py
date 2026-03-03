@@ -2,12 +2,12 @@ import os
 import unittest
 from pathlib import Path
 from data.Pipeline_Interface import Pipeline_Interface
-from data.TFRecords import TFRecords
+from data.TFRecordHandler import TFRecords
 
 class test_populate_pipeline(unittest.TestCase):
     ## Need to run in debug mode, python GIL is giving error not relevent to test
     def test_populate(self):
-        pipeline: Pipeline_Interface = TFRecords()
+        pipeline = TFRecords("Need to fix this test")
         pipeline.populate_training_data(default_size=10, default_games=100)
 
         name = pipeline.name

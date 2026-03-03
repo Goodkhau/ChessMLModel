@@ -1,7 +1,6 @@
 import sys
 from data.Pipeline_Interface import Pipeline_Interface
-from data.TFRecords import TFRecords
-from data.CycleData import Cycle_Data
+from data.CycleData import Cycle_TFRecords
 from base.Little_Blue.model_V1 import model_V1
 from prompter import get_input
 
@@ -12,8 +11,7 @@ if __name__ == "__main__":
         pipeline: Pipeline_Interface
         match (selection):
             case 1:
-                pipeline = Cycle_Data()
-                #pipeline.populate_training_data(default_size=1000, default_games=10000)
+                pipeline = Cycle_TFRecords()
             case 2:
                 model = model_V1().model
                 model.summary()
