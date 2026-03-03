@@ -1,7 +1,7 @@
 import unittest
-from base.model_V1_0.ChessSanLexer import ChessSanLexer as lexer
-from base.model_V1_0.Piece_Keys import PieceKeys as pk
-from base.model_V1_0.DataFormatter import TrainingData as formatter
+from base.Little_Blue.ChessSanLexer import ChessSanLexer as lexer
+from base.Little_Blue.Piece_Keys import PieceKeys as pk
+from base.Little_Blue.DataFormatter import TrainingData as formatter
 
 test_game: list[str] = [
     "e4","d6","d4","g6","Nc3",

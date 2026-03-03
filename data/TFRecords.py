@@ -10,7 +10,7 @@ from pathlib import Path
 from matplotlib import pyplot as plt
 from datetime import datetime
 
-from base.model_V1_0.DataFormatter import TrainingData as formatter
+from base.Little_Blue.DataFormatter import TrainingData as formatter
 from prompter import get_input
 from data.Pipeline_Interface import Pipeline_Interface
 
@@ -66,7 +66,7 @@ class TFRecords(Pipeline_Interface):
             for _ in dataset:
                 data_size+=1
             
-            dataset = dataset.shuffle(1000, True)
+            dataset = dataset.shuffle(1024, True)
             dataset = dataset.batch(batch_size=512)
             dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
