@@ -8,4 +8,8 @@ env/
 /.python-version
 
 # Training data directory
-training_data/
+data/training_data/*
+!data/training_data/readme.md
+
+base/Little_Blue/outputs/*
+!base/Little_Blue/outputs/readme.md
