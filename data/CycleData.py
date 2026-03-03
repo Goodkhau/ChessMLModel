@@ -88,13 +88,6 @@ class Cycle_TFRecords(Pipeline_Interface):
             for current, record_dir in enumerate[str](tfrecord.get_tfrecords_in_dir()):
                 raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=record_dir)
                 dataset: tf.data.Dataset[tuple[Tensor, Tensor]] = raw_dataset.map(tfrecord.parse_function, num_parallel_calls=tf.data.AUTOTUNE)
-
-                datasize = 0
-                for _ in dataset:
-                    datasize += 1
-                
-                print(datasize)
-                print(82*TFRECORD_SIZE)
             
                 dataset = dataset.shuffle(buffer_size=1024, reshuffle_each_iteration=True)
                 dataset = dataset.batch(batch_size=512)
