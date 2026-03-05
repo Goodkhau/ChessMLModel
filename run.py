@@ -1,6 +1,6 @@
 import sys
 from data.Pipeline_Interface import Pipeline_Interface
-from data.CycleData import Cycle_TFRecords
+from data.CycleTFRecords import Cycle_TFRecords
 from base.Little_Blue.model_V1 import model_V1
 from prompter import get_input
 
