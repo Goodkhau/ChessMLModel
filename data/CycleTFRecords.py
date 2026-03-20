@@ -15,6 +15,7 @@ from base.Little_Blue.DataFormatter import TrainingData as formatter
 from data.Pipeline_Interface import Pipeline_Interface
 from data.TFRecordHandler import TFRecords
 
+MAX_GAMES: int = 100000
 TFRECORD_SIZE: int = 1000
 LIMIT_GAMES: int = 100000
 EPOCHS: int = 67
@@ -63,7 +64,7 @@ class Cycle_TFRecords(Pipeline_Interface):
         for index, game in enumerate[dict[str, list[str]]](huggingface_data['train']):
             format = formatter(san_chess_notation=game['moves_san'])
 
-            if (index+1)%TFRECORD_SIZE != 0 or index == 14188453:
+            if (index+1)%TFRECORD_SIZE != 0 or index <= MAX_GAMES:
                 token: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices((format.san_to_token_tensorslices()))
                 label: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices((format.san_to_label_tensorslices()))
                 complete_token = complete_token.concatenate(dataset=token)
@@ -79,11 +80,11 @@ class Cycle_TFRecords(Pipeline_Interface):
             complete_token = tf.data.Dataset.from_tensor_slices((format.san_to_token_tensorslices()))
             complete_label = tf.data.Dataset.from_tensor_slices((format.san_to_label_tensorslices()))
             
-            if (index+1)%LIMIT_GAMES != 0 and index != 14188453:
+            if (index+1)%LIMIT_GAMES != 0 and index <= MAX_GAMES:
                 continue
             
             with open(log_dir, 'a') as writer:
-                _ = writer.write(str(index+1) + ' of 14188454\nStarting training.\n')
+                _ = writer.write(str(index+1) + f' of {MAX_GAMES}\nStarting training.\n')
             
             for current, record_dir in enumerate[str](tfrecord.get_tfrecords_in_dir()):
                 raw_dataset: tf.data.Dataset[tf.Tensor] = tf.data.TFRecordDataset(filenames=record_dir)
@@ -112,7 +113,7 @@ class Cycle_TFRecords(Pipeline_Interface):
                 time_taken: int = int((second-first).total_seconds())
                 total_time += time_taken
                 first = second
-                time_mins: float = (total_time/(iteration+1) * (14188453-index)/LIMIT_GAMES)/60
+                time_mins: float = (total_time/(iteration+1) * (MAX_GAMES-index)/LIMIT_GAMES)/60
 
                 _ = writer.write(f"Cleaning ' + {str(gc.collect())} + ' objects\n")
                 _ = writer.write(f"Finished in {time_taken/60} mins.\nEstimated time left: {time_mins//60}H  {time_mins%60}m\n")

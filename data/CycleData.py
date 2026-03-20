@@ -13,6 +13,9 @@ from huggingface_hub import login
 from base.Little_Blue.DataFormatter import TrainingData as formatter
 from data.Pipeline_Interface import Pipeline_Interface
 
+limit_games: int = 500
+max_games = 50000;
+
 class Cycle_Data(Pipeline_Interface):
     def __init__(self) -> None:
         self.pipeline_name: str = datetime.now().strftime(format="%Y%m%d%H%M%S")
@@ -46,7 +49,6 @@ class Cycle_Data(Pipeline_Interface):
 
         complete_token: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (8,8,8), dtype=np.int16))
         complete_label: tf.data.Dataset[tf.Tensor] = tf.data.Dataset.from_tensor_slices(tensors=np.empty((0,) + (386,), dtype=np.int8))
-        limit_games: int = 25000
         iteration: int = 1
 
         first: datetime = datetime.now()
@@ -63,7 +65,7 @@ class Cycle_Data(Pipeline_Interface):
                 continue
             
             with open(log_dir, 'a') as writer:
-                _ = writer.write(str(index+1) + ' of 14188454\nStarting training.\n')
+                _ = writer.write(str(index+1) + f'of {max_games}\nStarting training.\n')
 
             dataset: tf.data.Dataset[tuple[tf.Tensor, tf.Tensor]] = tf.data.Dataset.zip(complete_token, complete_label)
             data_size: int = sum(1 for _ in dataset if True)
@@ -96,7 +98,7 @@ class Cycle_Data(Pipeline_Interface):
                 time_taken: int = int((second-first).total_seconds())
                 total_time += time_taken
                 first = second
-                time_mins: float = (total_time/iteration * (14188453-index)/limit_games)/60
+                time_mins: float = (total_time/iteration * (max_games-index-1)/limit_games)/60
 
                 _ = writer.write(f"Cleaning ' + {str(gc.collect())} + ' objects\n")
                 _ = writer.write(f"Finished in {time_taken/60} mins.\nEstimated time left: {time_mins//60}H  {time_mins%60}m\n")
@@ -105,5 +107,8 @@ class Cycle_Data(Pipeline_Interface):
                 model.save(f"{self.directory}/keras/{iteration//5-1:04}.keras")
             
             iteration+=1
+
+            if (index >= max_games):
+                break
         
         model.save(f"{self.directory}/keras/{iteration//5:04}.keras")

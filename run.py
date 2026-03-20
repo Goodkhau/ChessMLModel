@@ -1,6 +1,6 @@
 import sys
 from data.Pipeline_Interface import Pipeline_Interface
-from data.CycleTFRecords import Cycle_TFRecords
+from data.CycleData import Cycle_Data
 from base.Little_Blue.model_V1 import model_V1
 from prompter import get_input
 
@@ -11,7 +11,7 @@ if __name__ == "__main__":
         pipeline: Pipeline_Interface
         match (selection):
             case 1:
-                pipeline = Cycle_TFRecords()
+                pipeline = Cycle_Data()
             case 2:
                 model = model_V1().model
                 model.summary()
