@@ -85,7 +85,7 @@ class TrainingData:
             else:
                 try:
                     position: str = self.get_position_from_san(san=element)
-                    pos: int = 8*(ord(position[0])-ord('a')) + int(position[1]-1)
+                    pos: int = 8*(ord(position[0])-ord('a')) + int(position[1])-1
                 except ValueError:
                     print("DataFormatter.py: Value Error: " + element)
                     sys.exit(1)
